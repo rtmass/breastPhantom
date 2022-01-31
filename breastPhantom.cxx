@@ -516,6 +516,9 @@ int main(int argc, char* argv[]){
   /***********************
 	Shape
   ***********************/
+  
+  //debug 
+  cout << "Creating shape \n";
 
   // create base shape
   // point positions
@@ -670,6 +673,9 @@ int main(int argc, char* argv[]){
 	
   // have base shape
   // do deformations
+  
+   //debug 
+  cout << "Deformations \n";
 
   // top shape
   if(doTopShape){
@@ -1558,6 +1564,9 @@ int main(int argc, char* argv[]){
   }
 
   // voxelize
+  
+  //debug 
+  cout << "Voxelizing \n";
 
   // list of boundary voxels
   vtkSmartPointer<vtkIdList> boundaryList =
@@ -2053,6 +2062,9 @@ int main(int argc, char* argv[]){
   /***********************
 	Skin
   ***********************/
+  
+  //debug 
+  cout << "Making skin \n";
 
   // create list of surrounding voxels to check
   vtkSmartPointer<vtkIntArray> checkVoxels =
@@ -2193,6 +2205,9 @@ int main(int argc, char* argv[]){
   /***********************
 	Nipple
   **********************/
+  
+  //debug 
+  cout << "Creating nipple \n";
 
   // create nipple structure
   //cout << "Creating nipple structure...";
@@ -2293,25 +2308,42 @@ int main(int argc, char* argv[]){
   }
 
   // add chest muscle
+  
+  //debug changed y to z direction
+  // rtmass 23-07-2021
+  
+  //debug 
+  cout << "Adding chest muscle \n";
 
 #pragma omp parallel for  
-  for(int j=0; j<dim[1]; j++){
+  for(int k=0; k<dim[2]; k++){
 	
     int muscleThick;
+    double muscleScale;
+    
+    muscleScale = pow(abs(k-dim[2]),0.75)/pow(dim[2],0.75);
+    
+    // modified chest muscle creation routine
+    
+    
+    //muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1-static_cast<double>(k*k)/(dim[2]*dim[2]))));
+    //muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1-static_cast<double>((k-dim[2])*(k-dim[2]))/(dim[2]*dim[2]))));
+    muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1.4-1.1*static_cast<double>(muscleScale))));
 		
-    if(leftSide){
-      muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1-static_cast<double>(j*j)/(dim[1]*dim[1]))));
-    }else{
-      muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1-static_cast<double>((j-dim[1])*(j-dim[1]))/(dim[1]*dim[1]))));
-    }
+    //if(leftSide){
+    //  muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1-static_cast<double>(k*k)/(dim[2]*dim[2]))));
+    //}else{
+    //  muscleThick = static_cast<int>(ceil((minSkinXVox-1)*(1-static_cast<double>((k-dim[2])*(k-dim[2]))/(dim[2]*dim[2]))));
+    //}
 		
-    for(int k=0; k<dim[2]; k++){
-      for(int i=0; i<=muscleThick; i++){
-	unsigned char* p =
-	  static_cast<unsigned char*>(breast->GetScalarPointer(i,j,k));
-	if(p[0] == innerVal){
-	  p[0] = tissue.muscle;
-	}
+    for(int j=0; j<dim[1]; j++){
+        double factorj = static_cast<double>(2-((dim[1]/2-j)*(dim[1]/2-j))/(dim[1]*dim[1]/4));
+      for(int i=0; i<=static_cast<int>(ceil(muscleThick*factorj)); i++){
+            unsigned char* p =
+                static_cast<unsigned char*>(breast->GetScalarPointer(i,j,k));
+            if(p[0] == innerVal){
+                p[0] = tissue.muscle;
+                }
       }
     }
   }
@@ -2319,6 +2351,9 @@ int main(int argc, char* argv[]){
   /***********************
 	Compartments
   ***********************/
+  
+  //debug 
+  cout << "Creating compartments \n";
 
   // breast segmentation into compartments and lipid buffer zone
 
@@ -2421,7 +2456,7 @@ int main(int argc, char* argv[]){
   double pcoords[3]; // parametric coordinates
   breast->ComputeStructuredCoordinates(seedBase,coords,pcoords);
   unsigned char* base = static_cast<unsigned char*>(breast->GetScalarPointer(coords));
-  if(base[0] != innerVal){
+  if((base[0] != innerVal)&&(base[0] != tissue.muscle)){
     // outside breast error
     cout << "Error, breast compartment seed base outside breast volume\n";
     return EXIT_FAILURE;
@@ -2674,6 +2709,7 @@ int main(int argc, char* argv[]){
   for(int i=0; i<numBackSeeds; i++){
     bool foundSeed = false;
     double y,z;
+    cout << i << "\n";
     while(!foundSeed){
       // pick random location on backplane away from edge of voxel space
       y = rgen->GetRangeValue(baseBound[2]+2*spacing[1],baseBound[3]-2*spacing[1]);
@@ -2735,6 +2771,7 @@ int main(int argc, char* argv[]){
     bool foundSeed = false;
     vtkIdType numPts = innerPoly->GetNumberOfPoints();
     double seedCoords[3];
+    cout << i << "\n";
     while(!foundSeed){
       // pick random breast surface point
       vtkIdType tryId = static_cast<vtkIdType>(ceil(rgen->GetRangeValue(0, numPts-1)));
@@ -3261,6 +3298,9 @@ int main(int argc, char* argv[]){
   ***********************/
 
   // create duct network
+  
+  //debug 
+  cout << "Creating Ducts \n";
 	
   // File to store duct locations
   char TDLUlocFilename[128];
@@ -3445,6 +3485,9 @@ int main(int argc, char* argv[]){
    *  fat lobules
    * 
    *********************/
+  
+  //debug 
+  cout << "Creating fat lobules \n";
 	
   // calculate glandular bounding box
   int glandBox[6] = {breastDim[0]+1,-1,breastDim[1]+1,-1,breastDim[2]+1,-1};
@@ -3487,6 +3530,9 @@ int main(int argc, char* argv[]){
    *  skin boundary fat lobules
    * 
    *********************/
+  
+  //debug 
+  cout << "Creating skin boundary fat lobules \n";
 
   double minSkinLobuleAxis; // min and max lobule axis length (mm)
   double maxSkinLobuleAxis;
@@ -3564,9 +3610,10 @@ int main(int argc, char* argv[]){
 	
   int numSkinLobules = 0;
   //vtkIdType numGlandBoundary = boundaryList->GetNumberOfIds();
+  bool failSkinLob = false;
   
-  while(numSkinLobules < maxSkinLobules && remBoundary > 0 && currentFatFrac < targetSkinFatFrac){
-    
+  while(numSkinLobules < maxSkinLobules && remBoundary > 0 && currentFatFrac < targetSkinFatFrac && failSkinLob==false){
+      
     // pick a random voxel from the boundary list
     int seedVox[3];
     int randVal;
@@ -3583,8 +3630,14 @@ int main(int argc, char* argv[]){
       }
     } else {
       bool foundVox = false;
+      int skinlobtry = 0;
       while(!foundVox){
 	randVal = (int)(floor(rgen->GetRangeValue(0, nBoundary)));
+    // added maximum number of tries
+    skinlobtry = skinlobtry +1;
+    if (skinlobtry>100000){
+        failSkinLob = true;
+    }
 	rgen->Next();
 	if(!boundaryDone[randVal]){
           foundVox = true;
@@ -3877,11 +3930,19 @@ int main(int argc, char* argv[]){
       }
     }
   }
+  
+  if (failSkinLob){
+  cout << "Max tries for skin lob reached, skipping some interactions \n";
+  cout << "Current expected value " << currentFatFrac << " Value reached " << targetSkinFatFrac <<"\n";
+  }
 
 	
   /***********************
    * Fat lobules in glandular tissue
    **********************/
+  
+  //debug 
+  cout << "Creating fat lobules in gland \n";
 
   int maxInnerFatLobuleTry;
   int numInnerFatLobuleTry = 0;
@@ -4142,6 +4203,9 @@ int main(int argc, char* argv[]){
   /*******************
    * Cooper's Ligaments
    ******************/
+  
+  //debug 
+  cout << "Creating cooper ligaments \n";
 
   double ligThick = vm["lig.thickness"].as<double>();
 	 
@@ -4519,6 +4583,9 @@ int main(int argc, char* argv[]){
   /********************
    * Vascular network
    *******************/
+  
+  //debug 
+  cout << "Creating vascular network \n";
 
   // create arterial network
 
@@ -4726,7 +4793,8 @@ int main(int argc, char* argv[]){
   /*************
    * Save stuff
    ************/
-
+  //debug 
+  cout << "Saving files \n";
   // save segmented breast with duct network
   vtkSmartPointer<vtkXMLImageDataWriter> writerSeg5 =
     vtkSmartPointer<vtkXMLImageDataWriter>::New();
