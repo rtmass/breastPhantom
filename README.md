@@ -2,6 +2,18 @@
 
 This is a modified version of the BreastPhantom software
 
+## Main modifications:
+
+- Added debug flags for each step.
+
+- Defined max number of tries in some while conditions to prevent the 
+code to be stuck in an infinite loop.
+
+- Modified the muscle function generation, so the muscle could be 
+visible after the compression routine (simulating a MLO view) 
+**(currently in BETA)**.
+
+
 DIDSR Anthropomorphic Breast Phantom Software
 
 **Documentation and installation instructions are available here:**
