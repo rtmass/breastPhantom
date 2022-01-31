@@ -1,5 +1,7 @@
 # BreastPhantom
 
+This is a modified version of the BreastPhantom software
+
 DIDSR Anthropomorphic Breast Phantom Software
 
 **Documentation and installation instructions are available here:**
